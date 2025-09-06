@@ -49,6 +49,8 @@
 
 html {
     scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -61,6 +63,7 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+    overscroll-behavior: none;
 }
 
 /* Container */
@@ -68,6 +71,7 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 var(--spacing-lg);
+    will-change: contents;
 }
 
 /* Navigation */
@@ -163,10 +167,15 @@ body {
     overflow: hidden;
 }
 
+.hero * {
+    will-change: transform, opacity;
+}
+
 .hero-content {
     text-align: center;
     z-index: 2;
     position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Removed centered gradient effect */
@@ -569,8 +578,9 @@ section {
     background: var(--background-card);
     border-radius: var(--radius-lg);
     overflow: hidden;
-    transition: all var(--transition-base);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: var(--shadow-sm);
+    will-change: transform, box-shadow;
 }
 
 .project-card:hover {
@@ -697,8 +707,9 @@ section {
     flex-direction: column;
     align-items: center;
     gap: var(--spacing-sm);
-    transition: transform var(--transition-base);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
+    will-change: transform;
 }
 
 .skill-icon-item:hover {
@@ -809,33 +820,74 @@ section {
     font-size: 0.9rem;
 }
 
-/* Fade In Animations */
+/* Smooth Apple-like Animations */
 .fade-in {
     opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.8s ease;
+    transform: translateY(40px) scale(0.98);
+    transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, opacity;
 }
 
 .fade-in-delay {
     opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.8s ease 0.2s;
+    transform: translateY(40px) scale(0.98);
+    transition: all 1s cubic-bezier(0.4, 0, 0.2, 1) 0.15s;
+    will-change: transform, opacity;
 }
 
 .fade-in-delay-2 {
     opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.8s ease 0.4s;
+    transform: translateY(40px) scale(0.98);
+    transition: all 1s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
+    will-change: transform, opacity;
 }
 
 .fade-in-delay-3 {
     opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.8s ease 0.6s;
+    transform: translateY(40px) scale(0.98);
+    transition: all 1s cubic-bezier(0.4, 0, 0.2, 1) 0.45s;
+    will-change: transform, opacity;
 }
 
 .fade-in.show {
     opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+/* Parallax and Scale Effects */
+.parallax-element {
+    will-change: transform;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scale-on-scroll {
+    will-change: transform, opacity;
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Stagger Animation */
+.stagger-item {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stagger-item.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Smooth Reveal */
+.reveal-text {
+    overflow: hidden;
+}
+
+.reveal-text-content {
+    transform: translateY(100%);
+    transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-text.show .reveal-text-content {
     transform: translateY(0);
 }
 

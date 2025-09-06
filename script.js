@@ -63,24 +63,68 @@ document.addEventListener('DOMContentLoaded', function() {
         lastScroll = currentScroll <= 0 ? 0 : currentScroll;
     });
     
-    // Intersection Observer for Fade-in Animations
+    // Advanced Intersection Observer for Smooth Animations
     const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
+        threshold: 0,
+        rootMargin: '0px 0px -100px 0px'
     };
     
-    const observer = new IntersectionObserver(function(entries) {
+    const animationObserver = new IntersectionObserver(function(entries) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.classList.add('show');
+                // Add show class with slight delay for smoother effect
+                requestAnimationFrame(() => {
+                    entry.target.classList.add('show');
+                });
             }
         });
     }, observerOptions);
     
+    // Stagger animation observer
+    const staggerObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const parent = entry.target;
+                const items = parent.querySelectorAll('.stagger-item');
+                
+                items.forEach((item, index) => {
+                    setTimeout(() => {
+                        item.classList.add('show');
+                    }, index * 80);
+                });
+                
+                staggerObserver.unobserve(parent);
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    // Parallax Observer for scroll-based transforms
+    const parallaxObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const scrolled = window.pageYOffset;
+                const rate = scrolled * -0.3;
+                entry.target.style.transform = `translateY(${rate}px)`;
+            }
+        });
+    });
+    
     // Observe all elements with fade-in classes
     const fadeElements = document.querySelectorAll('.fade-in, .fade-in-delay, .fade-in-delay-2, .fade-in-delay-3');
     fadeElements.forEach(element => {
-        observer.observe(element);
+        animationObserver.observe(element);
+    });
+    
+    // Add parallax to specific elements
+    const parallaxElements = document.querySelectorAll('.parallax-element');
+    parallaxElements.forEach(element => {
+        parallaxObserver.observe(element);
+    });
+    
+    // Observe containers with stagger items
+    const staggerContainers = document.querySelectorAll('.projects-grid, .about-stats, .skill-icons-grid');
+    staggerContainers.forEach(container => {
+        staggerObserver.observe(container);
     });
     
     // Trigger hero animations on load
@@ -90,22 +134,51 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }, 100);
     
-    // Parallax Effect for Hero Section
-    const heroSection = document.querySelector('.hero');
-    const heroGradient = document.querySelector('.hero-gradient');
-    
-    window.addEventListener('scroll', function() {
+    // Enhanced Parallax and Scale Effects
+    let ticking = false;
+    function updateParallax() {
         const scrolled = window.pageYOffset;
-        const parallaxSpeed = 0.5;
         
-        if (heroSection && scrolled < window.innerHeight) {
-            heroSection.style.transform = `translateY(${scrolled * parallaxSpeed}px)`;
+        // Hero parallax
+        const heroContent = document.querySelector('.hero-content');
+        if (heroContent && scrolled < window.innerHeight) {
+            const parallaxSpeed = 0.5;
+            const opacity = Math.max(0, 1 - (scrolled / window.innerHeight) * 1.5);
+            const scale = Math.max(0.8, 1 - (scrolled / window.innerHeight) * 0.3);
             
-            if (heroGradient) {
-                heroGradient.style.transform = `translate(-25%, -25%) translateY(${scrolled * parallaxSpeed * 0.5}px)`;
-            }
+            heroContent.style.transform = `translateY(${scrolled * parallaxSpeed}px) scale(${scale})`;
+            heroContent.style.opacity = opacity;
         }
-    });
+        
+        // Section animations based on scroll
+        document.querySelectorAll('.scale-on-scroll').forEach(element => {
+            const rect = element.getBoundingClientRect();
+            const elementTop = rect.top;
+            const elementBottom = rect.bottom;
+            const windowHeight = window.innerHeight;
+            
+            if (elementTop < windowHeight && elementBottom > 0) {
+                const distance = windowHeight - elementTop;
+                const percentage = distance / (windowHeight + rect.height);
+                const scale = 0.9 + (percentage * 0.1);
+                const translateY = (1 - percentage) * 20;
+                
+                element.style.transform = `translateY(${translateY}px) scale(${scale})`;
+                element.style.opacity = Math.min(1, percentage * 1.5);
+            }
+        });
+        
+        ticking = false;
+    }
+    
+    function requestTick() {
+        if (!ticking) {
+            window.requestAnimationFrame(updateParallax);
+            ticking = true;
+        }
+    }
+    
+    window.addEventListener('scroll', requestTick);
     
     // Active Navigation Link Highlighting
     const sections = document.querySelectorAll('section[id]');
