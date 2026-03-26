@@ -1,398 +1,262 @@
-// Wait for DOM to be fully loaded
-document.addEventListener('DOMContentLoaded', function() {
-    
-    // Mobile Navigation Toggle
-    const hamburger = document.querySelector('.hamburger');
-    const navMenu = document.querySelector('.nav-menu');
+document.addEventListener('DOMContentLoaded', () => {
+    // ============================================
+    // DOM References
+    // ============================================
+    const navbar = document.getElementById('navbar');
+    const navMenu = document.getElementById('nav-menu');
+    const hamburger = document.getElementById('hamburger');
+    const themeToggle = document.getElementById('theme-toggle');
+    const scrollProgress = document.getElementById('scroll-progress');
+    const copyrightYear = document.getElementById('copyright-year');
+    const sections = document.querySelectorAll('section[id]');
     const navLinks = document.querySelectorAll('.nav-link');
-    
-    hamburger.addEventListener('click', function() {
-        hamburger.classList.toggle('active');
-        navMenu.classList.toggle('active');
+
+    // ============================================
+    // Dynamic Copyright Year
+    // ============================================
+    if (copyrightYear) {
+        copyrightYear.textContent = new Date().getFullYear();
+    }
+
+    // ============================================
+    // Dark Mode Toggle
+    // ============================================
+    const getPreferredTheme = () => {
+        const stored = localStorage.getItem('theme');
+        if (stored) return stored;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setTheme = (theme) => {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+    };
+
+    // Initialize theme
+    setTheme(getPreferredTheme());
+
+    themeToggle.addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme');
+        setTheme(current === 'dark' ? 'light' : 'dark');
     });
-    
+
+    // ============================================
+    // Mobile Navigation
+    // ============================================
+    hamburger.addEventListener('click', () => {
+        const isActive = hamburger.classList.toggle('active');
+        navMenu.classList.toggle('active');
+        hamburger.setAttribute('aria-expanded', isActive);
+        document.body.style.overflow = isActive ? 'hidden' : '';
+    });
+
     navLinks.forEach(link => {
-        link.addEventListener('click', function() {
+        link.addEventListener('click', () => {
             hamburger.classList.remove('active');
             navMenu.classList.remove('active');
+            hamburger.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
         });
     });
-    
-    // Smooth Scrolling for Navigation Links
+
+    // ============================================
+    // Smooth Scrolling
+    // ============================================
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
+        anchor.addEventListener('click', (e) => {
             e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
+            const target = document.querySelector(anchor.getAttribute('href'));
             if (target) {
-                const headerOffset = 70;
-                const elementPosition = target.offsetTop;
-                const offsetPosition = elementPosition - headerOffset;
-                
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: 'smooth'
-                });
+                const offset = 80;
+                const top = target.offsetTop - offset;
+                window.scrollTo({ top, behavior: 'smooth' });
             }
         });
     });
-    
-    // Navbar Background on Scroll
-    const navbar = document.querySelector('.navbar');
+
+    // ============================================
+    // Consolidated Scroll Handler
+    // ============================================
     let lastScroll = 0;
-    
-    window.addEventListener('scroll', function() {
-        const currentScroll = window.pageYOffset;
-        
-        if (currentScroll > 100) {
-            navbar.style.background = 'rgba(255, 255, 255, 0.95)';
-            navbar.style.backdropFilter = 'saturate(180%) blur(30px)';
-            navbar.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
-        } else {
-            navbar.style.background = 'rgba(255, 255, 255, 0.9)';
-            navbar.style.backdropFilter = 'saturate(180%) blur(20px)';
-            navbar.style.boxShadow = 'none';
-        }
-        
-        // Hide/Show navbar on scroll
-        if (currentScroll > lastScroll && currentScroll > 500) {
-            navbar.style.transform = 'translateY(-100%)';
-        } else {
-            navbar.style.transform = 'translateY(0)';
-        }
-        
-        lastScroll = currentScroll <= 0 ? 0 : currentScroll;
-    });
-    
-    // Advanced Intersection Observer for Smooth Animations
-    const observerOptions = {
-        threshold: 0,
-        rootMargin: '0px 0px -100px 0px'
-    };
-    
-    const animationObserver = new IntersectionObserver(function(entries) {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                // Add show class with slight delay for smoother effect
-                requestAnimationFrame(() => {
-                    entry.target.classList.add('show');
-                });
-            }
-        });
-    }, observerOptions);
-    
-    // Stagger animation observer
-    const staggerObserver = new IntersectionObserver(function(entries) {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const parent = entry.target;
-                const items = parent.querySelectorAll('.stagger-item');
-                
-                items.forEach((item, index) => {
-                    setTimeout(() => {
-                        item.classList.add('show');
-                    }, index * 80);
-                });
-                
-                staggerObserver.unobserve(parent);
-            }
-        });
-    }, { threshold: 0.1 });
-    
-    // Parallax Observer for scroll-based transforms
-    const parallaxObserver = new IntersectionObserver(function(entries) {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const scrolled = window.pageYOffset;
-                const rate = scrolled * -0.3;
-                entry.target.style.transform = `translateY(${rate}px)`;
-            }
-        });
-    });
-    
-    // Observe all elements with fade-in classes
-    const fadeElements = document.querySelectorAll('.fade-in, .fade-in-delay, .fade-in-delay-2, .fade-in-delay-3');
-    fadeElements.forEach(element => {
-        animationObserver.observe(element);
-    });
-    
-    // Add parallax to specific elements
-    const parallaxElements = document.querySelectorAll('.parallax-element');
-    parallaxElements.forEach(element => {
-        parallaxObserver.observe(element);
-    });
-    
-    // Observe containers with stagger items
-    const staggerContainers = document.querySelectorAll('.projects-grid, .about-stats, .skill-icons-grid');
-    staggerContainers.forEach(container => {
-        staggerObserver.observe(container);
-    });
-    
-    // Trigger hero animations on load
-    setTimeout(() => {
-        document.querySelectorAll('.hero .fade-in, .hero .fade-in-delay, .hero .fade-in-delay-2, .hero .fade-in-delay-3').forEach(element => {
-            element.classList.add('show');
-        });
-    }, 100);
-    
-    // Enhanced Parallax and Scale Effects
     let ticking = false;
-    function updateParallax() {
-        const scrolled = window.pageYOffset;
-        
-        // Hero parallax
-        const heroContent = document.querySelector('.hero-content');
-        if (heroContent && scrolled < window.innerHeight) {
-            const parallaxSpeed = 0.5;
-            const opacity = Math.max(0, 1 - (scrolled / window.innerHeight) * 1.5);
-            const scale = Math.max(0.8, 1 - (scrolled / window.innerHeight) * 0.3);
-            
-            heroContent.style.transform = `translateY(${scrolled * parallaxSpeed}px) scale(${scale})`;
-            heroContent.style.opacity = opacity;
+
+    const onScroll = () => {
+        const scrollY = window.pageYOffset;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+
+        // 1. Scroll progress bar
+        if (scrollProgress) {
+            const progress = docHeight > 0 ? (scrollY / docHeight) * 100 : 0;
+            scrollProgress.style.width = `${progress}%`;
         }
-        
-        // Section animations based on scroll
-        document.querySelectorAll('.scale-on-scroll').forEach(element => {
-            const rect = element.getBoundingClientRect();
-            const elementTop = rect.top;
-            const elementBottom = rect.bottom;
-            const windowHeight = window.innerHeight;
-            
-            if (elementTop < windowHeight && elementBottom > 0) {
-                const distance = windowHeight - elementTop;
-                const percentage = distance / (windowHeight + rect.height);
-                const scale = 0.9 + (percentage * 0.1);
-                const translateY = (1 - percentage) * 20;
-                
-                element.style.transform = `translateY(${translateY}px) scale(${scale})`;
-                element.style.opacity = Math.min(1, percentage * 1.5);
+
+        // 2. Navbar visibility & style
+        if (navbar) {
+            // Add shadow when scrolled
+            navbar.classList.toggle('scrolled', scrollY > 50);
+
+            // Hide/show on scroll direction
+            if (scrollY > lastScroll && scrollY > 400) {
+                navbar.classList.add('hidden');
+            } else {
+                navbar.classList.remove('hidden');
+            }
+        }
+
+        // 3. Active navigation link
+        let currentSection = '';
+        sections.forEach(section => {
+            const top = section.offsetTop - 120;
+            if (scrollY >= top) {
+                currentSection = section.getAttribute('id');
             }
         });
-        
+
+        navLinks.forEach(link => {
+            link.classList.toggle('active', link.getAttribute('href') === `#${currentSection}`);
+        });
+
+        // 4. Hero parallax (only when hero is visible)
+        const heroContent = document.querySelector('.hero-content');
+        if (heroContent && scrollY < window.innerHeight) {
+            const ratio = scrollY / window.innerHeight;
+            heroContent.style.opacity = Math.max(0, 1 - ratio * 1.5);
+            heroContent.style.transform = `translateY(${scrollY * 0.3}px)`;
+        }
+
+        lastScroll = scrollY;
         ticking = false;
-    }
-    
-    function requestTick() {
+    };
+
+    window.addEventListener('scroll', () => {
         if (!ticking) {
-            window.requestAnimationFrame(updateParallax);
+            requestAnimationFrame(onScroll);
             ticking = true;
         }
-    }
-    
-    window.addEventListener('scroll', requestTick);
-    
-    // Active Navigation Link Highlighting
-    const sections = document.querySelectorAll('section[id]');
-    
-    function highlightNavigation() {
-        const scrollY = window.pageYOffset;
-        
-        sections.forEach(section => {
-            const sectionHeight = section.offsetHeight;
-            const sectionTop = section.offsetTop - 100;
-            const sectionId = section.getAttribute('id');
-            const navLink = document.querySelector(`.nav-link[href="#${sectionId}"]`);
-            
-            if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
-                navLink?.classList.add('active');
-            } else {
-                navLink?.classList.remove('active');
-            }
-        });
-    }
-    
-    window.addEventListener('scroll', highlightNavigation);
-    
-    // Project Card Tilt Effect
-    const projectCards = document.querySelectorAll('.project-card');
-    
-    projectCards.forEach(card => {
-        card.addEventListener('mousemove', function(e) {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
-            
-            const rotateX = (y - centerY) / 10;
-            const rotateY = (centerX - x) / 10;
-            
-            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
-        });
-        
-        card.addEventListener('mouseleave', function() {
-            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateZ(0)';
-        });
-    });
-    
-    // Typing Effect for Hero Title (Optional Enhancement)
-    const nameElement = document.querySelector('.name');
-    if (nameElement) {
-        const text = nameElement.textContent;
-        nameElement.textContent = '';
-        nameElement.style.opacity = '1';
-        let index = 0;
-        
-        function typeWriter() {
-            if (index < text.length) {
-                nameElement.textContent += text.charAt(index);
-                index++;
-                setTimeout(typeWriter, 80);
-            }
-        }
-        
-        // Start typing after a short delay
-        setTimeout(typeWriter, 500);
-    }
-    
-    // Smooth Hover Effects for Buttons
-    const buttons = document.querySelectorAll('.btn');
-    
-    buttons.forEach(button => {
-        button.addEventListener('mouseenter', function(e) {
-            const x = e.pageX - button.offsetLeft;
-            const y = e.pageY - button.offsetTop;
-            
-            const ripple = document.createElement('span');
-            ripple.style.left = `${x}px`;
-            ripple.style.top = `${y}px`;
-            ripple.classList.add('ripple');
-            
-            this.appendChild(ripple);
-            
-            setTimeout(() => {
-                ripple.remove();
-            }, 600);
-        });
-    });
-    
-    // Add ripple effect styles dynamically
-    const style = document.createElement('style');
-    style.textContent = `
-        .ripple {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            animation: ripple-animation 0.6s ease-out;
-        }
-        
-        @keyframes ripple-animation {
-            from {
-                width: 0;
-                height: 0;
-                opacity: 1;
-            }
-            to {
-                width: 200px;
-                height: 200px;
-                opacity: 0;
-            }
-        }
-        
-        .nav-link.active {
-            color: var(--text-accent) !important;
-        }
-        
-        .nav-link.active::after {
-            width: 100%;
-        }
-    `;
-    document.head.appendChild(style);
-    
-    // Lazy Loading for Project Images (Performance Optimization)
-    const projectImages = document.querySelectorAll('.project-image');
-    
-    const imageObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                // Add loading animation or actual image loading logic here
-                entry.target.style.opacity = '1';
-                observer.unobserve(entry.target);
-            }
-        });
-    }, {
-        rootMargin: '50px'
-    });
-    
-    projectImages.forEach(img => {
-        img.style.opacity = '0';
-        img.style.transition = 'opacity 0.5s ease';
-        imageObserver.observe(img);
-    });
-    
-    // Smooth Scroll Progress Indicator (Optional)
-    const createScrollProgress = () => {
-        const progressBar = document.createElement('div');
-        progressBar.id = 'scroll-progress';
-        progressBar.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
-            z-index: 10000;
-            transition: width 0.2s ease;
-        `;
-        document.body.appendChild(progressBar);
-        
-        window.addEventListener('scroll', () => {
-            const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            const scrolled = (window.scrollY / windowHeight) * 100;
-            progressBar.style.width = `${scrolled}%`;
-        });
-    };
-    
-    createScrollProgress();
-    
-    // Contact Form Validation (if you add a form later)
-    const validateEmail = (email) => {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
-    };
-    
-    // Performance: Debounce scroll events
-    let scrollTimeout;
-    const debounceScroll = (callback, delay = 10) => {
-        window.addEventListener('scroll', () => {
-            if (scrollTimeout) {
-                clearTimeout(scrollTimeout);
-            }
-            scrollTimeout = setTimeout(callback, delay);
-        });
-    };
-    
-    // Initialize AOS-like animations for timeline items
-    const timelineItems = document.querySelectorAll('.timeline-item');
-    
-    timelineItems.forEach((item, index) => {
-        item.style.opacity = '0';
-        item.style.transform = index % 2 === 0 ? 'translateX(-50px)' : 'translateX(50px)';
-        
-        const timelineObserver = new IntersectionObserver((entries) => {
+    }, { passive: true });
+
+    // ============================================
+    // Intersection Observer — Reveal Animations
+    // ============================================
+    const revealObserver = new IntersectionObserver(
+        (entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
+                    const el = entry.target;
+                    const delay = parseInt(el.dataset.delay || '0', 10);
                     setTimeout(() => {
-                        entry.target.style.transition = 'all 0.8s ease';
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateX(0)';
-                    }, index * 100);
+                        el.classList.add('active');
+                    }, delay);
+                    revealObserver.unobserve(el);
                 }
             });
-        }, {
-            threshold: 0.3
+        },
+        { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    // Observe all reveal elements (skip hero — handled separately)
+    document.querySelectorAll('.reveal:not(.hero .reveal)').forEach(el => {
+        revealObserver.observe(el);
+    });
+
+    // ============================================
+    // Hero Animation — Trigger Immediately
+    // ============================================
+    const heroReveals = document.querySelectorAll('.hero .reveal');
+    heroReveals.forEach(el => {
+        const delay = parseInt(el.dataset.delay || '0', 10);
+        setTimeout(() => {
+            el.classList.add('active');
+        }, 200 + delay); // 200ms base delay after page load
+    });
+
+    // ============================================
+    // Stat Counter Animation
+    // ============================================
+    const animateCounters = () => {
+        const counters = document.querySelectorAll('.stat-number[data-target]');
+        counters.forEach(counter => {
+            if (counter.dataset.animated) return;
+
+            const target = parseInt(counter.dataset.target, 10);
+            const duration = 2000;
+            const startTime = performance.now();
+
+            const easeOutQuart = (t) => 1 - Math.pow(1 - t, 4);
+
+            const tick = (now) => {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = easeOutQuart(progress);
+                counter.textContent = Math.round(eased * target);
+
+                if (progress < 1) {
+                    requestAnimationFrame(tick);
+                } else {
+                    counter.textContent = target;
+                }
+            };
+
+            counter.dataset.animated = 'true';
+            requestAnimationFrame(tick);
         });
-        
-        timelineObserver.observe(item);
+    };
+
+    const statsObserver = new IntersectionObserver(
+        (entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounters();
+                    statsObserver.unobserve(entry.target);
+                }
+            });
+        },
+        { threshold: 0.3 }
+    );
+
+    const statsSection = document.querySelector('.about-stats');
+    if (statsSection) {
+        statsObserver.observe(statsSection);
+    }
+
+    // ============================================
+    // Project Card Tilt Effect
+    // ============================================
+    const projectCards = document.querySelectorAll('.project-card');
+
+    projectCards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+
+            card.style.transform = `
+                perspective(800px)
+                rotateX(${-y * 6}deg)
+                rotateY(${x * 6}deg)
+                translateY(-8px)
+            `;
+        });
+
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = '';
+        });
     });
-    
-    // Preloader (Optional - for production)
-    window.addEventListener('load', () => {
-        document.body.classList.add('loaded');
-    });
-    
+
+    // ============================================
+    // Initial scroll position check
+    // ============================================
+    onScroll();
+
+    // ============================================
     // Console Easter Egg
-    console.log('%c Welcome to my portfolio! 🚀', 'font-size: 20px; color: #2997ff; font-weight: bold;');
-    console.log('%c Feel free to explore the code! 💻', 'font-size: 14px; color: #86868b;');
+    // ============================================
+    console.log(
+        '%c👋 Welcome to my portfolio!',
+        'font-size: 18px; color: #6366f1; font-weight: bold;'
+    );
+    console.log(
+        '%cBuilt with vanilla HTML, CSS & JS ✨',
+        'font-size: 13px; color: #94a3b8;'
+    );
 });
