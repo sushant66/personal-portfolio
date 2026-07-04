@@ -1,0 +1,250 @@
+/* ============================================================
+   DESIGN TOKENS — engineered / structural
+   Color: ink on near-white, one signal (orange). OKLCH throughout.
+   ============================================================ */
+:root {
+  color-scheme: light;
+
+  /* Surfaces & ink — light */
+  --bg: oklch(0.985 0.001 240);
+  --surface: oklch(0.968 0.002 240);
+  --surface-2: oklch(0.945 0.003 240);
+  --ink: oklch(0.20 0.012 255);
+  --ink-2: oklch(0.44 0.012 255);
+  --ink-3: oklch(0.48 0.010 255);
+  --line: oklch(0.90 0.004 255);
+  --line-strong: oklch(0.82 0.006 255);
+
+  /* Signal — orange */
+  --signal: oklch(0.64 0.19 45);
+  --signal-strong: oklch(0.58 0.19 43);
+  --signal-text: oklch(0.50 0.15 42); /* signal used AS text on light (~4.6:1) */
+  --signal-tint: oklch(0.64 0.19 45 / 0.10);
+  --signal-tint-2: oklch(0.64 0.19 45 / 0.18);
+
+  /* On-signal text (ink on orange fill reads far better than white) */
+  --on-signal: oklch(0.20 0.02 60);
+
+  /* Typography */
+  --font-sans: 'Archivo Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Fluid type scale (~1.25 modular) */
+  --step--1: clamp(0.80rem, 0.77rem + 0.15vw, 0.875rem);
+  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  --step-1: clamp(1.2rem, 1.12rem + 0.4vw, 1.4rem);
+  --step-2: clamp(1.5rem, 1.35rem + 0.75vw, 1.9rem);
+  --step-3: clamp(1.9rem, 1.6rem + 1.5vw, 2.75rem);
+  --step-4: clamp(2.4rem, 1.9rem + 2.6vw, 4rem);
+  --step-5: clamp(2.9rem, 2.1rem + 4vw, 5.25rem);
+
+  /* Spacing */
+  --space-1: 0.5rem;
+  --space-2: 0.75rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2rem;
+  --space-6: 3rem;
+  --space-7: 4.5rem;
+  --space-8: 7rem;
+
+  /* Structure */
+  --measure: 68ch;
+  --content-max: 1120px;
+  --gutter: clamp(1.25rem, 5vw, 3rem);
+  --radius: 4px;
+  --radius-lg: 8px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* ~ease-out-quint */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --dur-1: 0.18s;
+  --dur-2: 0.32s;
+  --dur-3: 0.6s;
+
+  /* Semantic z-index scale */
+  --z-nav: 100;
+  --z-backdrop: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+  --z-tooltip: 500;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: oklch(0.20 0.008 255);
+  --surface: oklch(0.24 0.010 255);
+  --surface-2: oklch(0.28 0.012 255);
+  --ink: oklch(0.95 0.003 255);
+  --ink-2: oklch(0.74 0.006 255);
+  --ink-3: oklch(0.66 0.008 255);
+  --line: oklch(0.32 0.008 255);
+  --line-strong: oklch(0.40 0.010 255);
+
+  --signal: oklch(0.72 0.17 55);
+  --signal-strong: oklch(0.78 0.16 58);
+  --signal-text: oklch(0.78 0.15 58); /* pops on dark, high contrast */
+  --signal-tint: oklch(0.72 0.17 55 / 0.14);
+  --signal-tint-2: oklch(0.72 0.17 55 / 0.22);
+  --on-signal: oklch(0.18 0.02 60);
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem; /* clear the sticky nav on anchor jumps */
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--step-0);
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  transition: background-color var(--dur-2) var(--ease-out),
+    color var(--dur-2) var(--ease-out);
+}
+
+h1, h2, h3, h4 {
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+p { text-wrap: pretty; }
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img { max-width: 100%; display: block; }
+
+ul { list-style: none; }
+
+:where(a, button, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+::selection {
+  background: var(--signal-tint-2);
+  color: var(--ink);
+}
+
+/* Skip link — first focusable element; off-screen until keyboard-focused */
+.skip-link {
+  position: absolute;
+  left: var(--gutter);
+  top: -120px;
+  z-index: var(--z-tooltip);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--bg);
+  background: var(--ink);
+  padding: 0.6em 1em;
+  border-radius: var(--radius);
+  transition: top var(--dur-1) var(--ease-out);
+}
+.skip-link:focus-visible {
+  top: 0.75rem;
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   LAYOUT PRIMITIVES
+   ============================================================ */
+.shell {
+  width: 100%;
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Mono kicker — the ONE label system. Used sparingly, not on every section. */
+.kicker {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--signal-text);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6ch;
+}
+.kicker::before {
+  content: '';
+  width: 0.7ch;
+  height: 0.7ch;
+  background: var(--signal);
+  display: inline-block;
+}
+
+.mono { font-family: var(--font-mono); }
+
+/* Section rhythm — hairline rules separate, no alternating fills */
+.section {
+  padding-block: var(--space-8);
+  border-top: 1px solid var(--line);
+}
+
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.section-title {
+  font-size: var(--step-3);
+}
+
+.section-index {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--ink-3);
+  letter-spacing: 0.05em;
+}
+
+/* ============================================================
+   MOTION — reveal ENHANCES an already-visible default.
+   Base state is visible. The hidden→reveal transition is opted into
+   only when JS is present (html.js, set before paint) AND motion is
+   allowed. So no-JS, pre-hydration, and reduced-motion all render the
+   content visible, and a load-time failsafe reveals anything still
+   hidden — the page can never ship blank.
+   ============================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html.js [data-reveal] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity var(--dur-3) var(--ease-out),
+      transform var(--dur-3) var(--ease-out);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  html.js [data-reveal].is-in {
+    opacity: 1;
+    transform: none;
+  }
+}

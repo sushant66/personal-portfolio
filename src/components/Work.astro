@@ -1,0 +1,165 @@
+---
+import Icon from './Icon.astro';
+import { projects } from '../data/portfolio';
+---
+
+<section class="section" id="projects">
+  <div class="shell">
+    <div class="section-head" data-reveal>
+      <h2 class="section-title">Selected projects</h2>
+    </div>
+
+    <ol class="work">
+      {
+        projects.map((p) => (
+          <li class="row" data-reveal>
+            <span class="row-index">{p.index}</span>
+
+            <div class="row-head">
+              <h3 class="row-title">{p.title}</h3>
+              <span class="row-tagline">{p.tagline}</span>
+            </div>
+
+            <p class="row-desc">{p.description}</p>
+
+            <ul class="tags">
+              {p.stack.map((t) => (
+                <li class="tag">{t}</li>
+              ))}
+            </ul>
+
+            <div class="row-links">
+              {p.links.map((l) => (
+                <a
+                  href={l.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="row-link"
+                >
+                  {l.kind === 'github' ? (
+                    <Icon name="github" size={16} />
+                  ) : (
+                    <Icon name="external" size={16} />
+                  )}
+                  <span>{l.label}</span>
+                </a>
+              ))}
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .work { display: flex; flex-direction: column; }
+  .row {
+    display: grid;
+    grid-template-columns: 3.5rem minmax(0, 1.1fr) minmax(0, 1.4fr);
+    grid-template-areas:
+      'idx head desc'
+      'idx tags links';
+    gap: var(--space-2) clamp(1rem, 3vw, 2.5rem);
+    align-items: start;
+    padding-block: var(--space-5);
+    border-top: 1px solid var(--line);
+    position: relative;
+  }
+  .row:first-child { border-top: 1px solid var(--line-strong); }
+  .row::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: -1px;
+    width: 0;
+    height: 2px;
+    background: var(--signal);
+    transition: width var(--dur-3) var(--ease-out);
+  }
+  .row:hover::after { width: 3.5rem; }
+
+  .row-index {
+    grid-area: idx;
+    font-family: var(--font-mono);
+    font-size: var(--step-0);
+    color: var(--ink-3);
+    padding-top: 0.25em;
+  }
+  .row-head { grid-area: head; }
+  .row-title {
+    font-size: var(--step-2);
+    letter-spacing: -0.02em;
+    transition: color var(--dur-1) var(--ease-out);
+  }
+  .row:hover .row-title { color: var(--signal-text); }
+  .row-tagline {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--ink-3);
+    margin-top: 4px;
+  }
+  .row-desc {
+    grid-area: desc;
+    color: var(--ink-2);
+    font-size: var(--step-0);
+    line-height: 1.6;
+    max-width: 52ch;
+  }
+  .tags {
+    grid-area: tags;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-content: start;
+  }
+  .tag {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--ink-2);
+    padding: 0.25em 0.65em;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  .row-links {
+    grid-area: links;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    align-content: start;
+  }
+  .row-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5ch;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--ink);
+    border-bottom: 1px solid var(--line-strong);
+    padding-bottom: 2px;
+    transition: color var(--dur-1) var(--ease-out),
+      border-color var(--dur-1) var(--ease-out);
+  }
+  .row-link:hover { color: var(--signal-text); border-color: var(--signal); }
+
+  @media (max-width: 860px) {
+    .row {
+      grid-template-columns: 2.5rem 1fr;
+      grid-template-areas:
+        'idx head'
+        'idx desc'
+        'idx tags'
+        'idx links';
+      gap: var(--space-3) var(--space-4);
+    }
+  }
+  @media (max-width: 520px) {
+    .row {
+      grid-template-columns: 1fr;
+      grid-template-areas: 'head' 'desc' 'tags' 'links';
+    }
+    .row-index { display: none; }
+  }
+</style>

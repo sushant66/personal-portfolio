@@ -1,0 +1,23 @@
+{
+  "name": "sushant-portfolio",
+  "type": "module",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "fetch-resume": "node scripts/fetch-resume.mjs",
+    "predev": "node scripts/fetch-resume.mjs",
+    "dev": "astro dev",
+    "prebuild": "node scripts/fetch-resume.mjs",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.3",
+    "@fontsource-variable/archivo": "^5.2.5",
+    "@fontsource/geist-mono": "^5.2.5",
+    "astro": "^5.6.1",
+    "devicon": "^2.16.0",
+    "pdfjs-dist": "^4.10.38",
+    "simple-icons": "^16.24.1"
+  }
+}

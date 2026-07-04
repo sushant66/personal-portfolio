@@ -1,0 +1,70 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import Icon from '../components/Icon.astro';
+---
+
+<Base title="404 · Page not found" description="This page could not be found.">
+  <Nav />
+
+  <main id="main" class="shell notfound">
+    <p class="kicker">Error 404</p>
+    <h1>This page took a wrong turn.</h1>
+    <p class="lead">
+      The page you're looking for doesn't exist, moved, or never shipped.
+    </p>
+    <div class="actions">
+      <a href="/" class="btn btn-primary">
+        <span>Back to home</span>
+        <Icon name="arrow" size={18} />
+      </a>
+      <a href="/#projects" class="btn btn-ghost">See the work</a>
+    </div>
+  </main>
+
+  <Footer />
+</Base>
+
+<style>
+  .notfound {
+    min-height: 62vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-block: clamp(4rem, 12vh, 8rem);
+  }
+  .notfound h1 {
+    font-size: var(--step-4);
+    letter-spacing: -0.035em;
+    margin-block: var(--space-3) var(--space-4);
+    max-width: 18ch;
+  }
+  .notfound .lead {
+    font-size: var(--step-1);
+    color: var(--ink-2);
+    max-width: 46ch;
+    margin-bottom: var(--space-6);
+  }
+  .actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6ch;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    padding: 0.8em 1.3em;
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    transition: transform var(--dur-1) var(--ease-out),
+      background var(--dur-1) var(--ease-out),
+      color var(--dur-1) var(--ease-out),
+      border-color var(--dur-1) var(--ease-out);
+  }
+  .btn svg { transition: transform var(--dur-2) var(--ease-out); }
+  .btn-primary { background: var(--ink); color: var(--bg); }
+  .btn-primary:hover { background: var(--signal); color: var(--on-signal); }
+  .btn-primary:hover svg { transform: translateX(3px); }
+  .btn-ghost { color: var(--ink); border-color: var(--line-strong); }
+  .btn-ghost:hover { border-color: var(--signal); color: var(--signal-text); }
+</style>

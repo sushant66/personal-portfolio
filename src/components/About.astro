@@ -1,0 +1,45 @@
+---
+import { about } from '../data/portfolio';
+---
+
+<section class="section" id="about">
+  <div class="shell about-grid">
+    <div class="section-head about-head" data-reveal>
+      <h2 class="section-title">About</h2>
+    </div>
+    <div class="about-body">
+      {about.map((para, i) => (
+        <p data-reveal style={`--reveal-delay: ${i * 80}ms`}>{para}</p>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .about-grid {
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+    gap: clamp(1rem, 4vw, 3rem);
+  }
+  .about-head {
+    display: block;
+    margin-bottom: 0;
+  }
+  .about-head .section-index { display: block; margin-top: var(--space-2); }
+  .about-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    max-width: var(--measure);
+  }
+  .about-body p {
+    font-size: var(--step-1);
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
+  .about-body p:first-child { color: var(--ink); }
+
+  @media (max-width: 720px) {
+    .about-grid { grid-template-columns: 1fr; }
+  }
+</style>

@@ -1,0 +1,142 @@
+---
+import 'devicon/devicon.min.css';
+import { siClaude, siLangchain, siCelery } from 'simple-icons';
+import { stack } from '../data/portfolio';
+
+// Brand icons devicon lacks. Rendered in ink (currentColor) so they match the
+// existing monochrome devicons (Flask, Kafka, Next.js) and stay legible in both
+// themes — brand hexes are unavailable (OpenAI) or too low-contrast on light.
+// OpenAI was removed from Simple Icons, so its official mark is inlined here.
+const OPENAI_PATH =
+  'M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997z';
+const brandPath: Record<string, string> = {
+  openai: OPENAI_PATH,
+  claude: siClaude.path,
+  langchain: siLangchain.path,
+  celery: siCelery.path,
+};
+---
+
+<section class="section" id="stack">
+  <div class="shell">
+    <div class="section-head" data-reveal>
+      <h2 class="section-title">Stack</h2>
+    </div>
+
+    <div class="matrix">
+      {
+        stack.map((group, i) => (
+          <div class="group" data-reveal style={`--reveal-delay: ${i * 60}ms`}>
+            <p class="group-label">
+              <span class="group-tick" aria-hidden="true" />
+              {group.label}
+            </p>
+            <ul class="items">
+              {group.items.map((it) => (
+                <li class="item">
+                  {it.icon ? (
+                    <i class={it.icon} aria-hidden="true" />
+                  ) : it.si && brandPath[it.si] ? (
+                    <svg class="brand" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d={brandPath[it.si]} />
+                    </svg>
+                  ) : it.img ? (
+                    <img src={it.img} alt="" width="22" height="22" loading="lazy" />
+                  ) : (
+                    <span class="ic-mark" aria-hidden="true" />
+                  )}
+                  <span>{it.name}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .matrix {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0;
+    border-top: 1px solid var(--line-strong);
+  }
+  .group {
+    padding: var(--space-4) var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+  }
+  /* keep the outer right edge clean where the grid wraps */
+  .group:last-child { border-right: none; }
+
+  .group-label {
+    display: flex;
+    align-items: baseline;
+    gap: 0.7ch;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--ink);
+    letter-spacing: 0.02em;
+    margin-bottom: var(--space-4);
+  }
+  .group-tick {
+    width: 0.7ch;
+    height: 0.7ch;
+    background: var(--signal);
+    flex: none;
+    align-self: center;
+  }
+
+  .items { display: flex; flex-direction: column; gap: var(--space-3); }
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 0.8ch;
+    color: var(--ink-2);
+    transition: color var(--dur-1) var(--ease-out);
+  }
+  .item:hover { color: var(--ink); }
+  .item i {
+    font-size: 1.4rem;
+    width: 1.4rem;
+    text-align: center;
+    color: var(--ink-2);
+  }
+  /* brand icons devicon lacks — ink, matching monochrome devicons */
+  .item .brand {
+    width: 1.35rem;
+    height: 1.35rem;
+    flex: none;
+    color: var(--ink-2);
+  }
+  /* neutral marker for entries with no real logo (SQL, RAG, LangGraph) */
+  .ic-mark {
+    width: 1.4rem;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ic-mark::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border: 1.5px solid var(--ink-3);
+    border-radius: 2px;
+  }
+  /* devicons render in their own brand color via .colored; uncolored ones
+     inherit ink so they stay legible in both themes */
+  .item img { object-fit: contain; }
+  .item span { font-size: var(--step-0); }
+
+  @media (max-width: 720px) {
+    .matrix { grid-template-columns: 1fr 1fr; }
+    .group:nth-child(2n) { border-right: none; }
+  }
+  @media (max-width: 460px) {
+    .matrix { grid-template-columns: 1fr; }
+    .group { border-right: none; }
+  }
+</style>

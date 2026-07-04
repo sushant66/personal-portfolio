@@ -1,0 +1,49 @@
+---
+import Icon from './Icon.astro';
+---
+
+<button id="theme-toggle" type="button" aria-label="Toggle color theme">
+  <span class="ic ic-sun"><Icon name="sun" size={18} /></span>
+  <span class="ic ic-moon"><Icon name="moon" size={18} /></span>
+</button>
+
+<style>
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: color var(--dur-1) var(--ease-out),
+      border-color var(--dur-1) var(--ease-out),
+      background var(--dur-1) var(--ease-out);
+  }
+  button:hover {
+    color: var(--signal-text);
+    border-color: var(--signal);
+    background: var(--signal-tint);
+  }
+  .ic { display: inline-flex; }
+  .ic-moon { display: none; }
+  :global([data-theme='dark']) .ic-sun { display: none; }
+  :global([data-theme='dark']) .ic-moon { display: inline-flex; }
+</style>
+
+<script is:inline>
+  document.getElementById('theme-toggle')?.addEventListener('click', () => {
+    const root = document.documentElement;
+    const isDark = root.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      root.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'light');
+    } else {
+      root.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+    }
+  });
+</script>

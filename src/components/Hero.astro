@@ -1,0 +1,135 @@
+---
+import Icon from './Icon.astro';
+import { profile } from '../data/portfolio';
+---
+
+<section class="hero" id="top">
+  <div class="shell">
+    <div class="hero-inner">
+      <p class="kicker" data-reveal>{profile.role} · {profile.location}</p>
+
+      <h1 class="hero-name" data-reveal style="--reveal-delay: 60ms">
+        {profile.name}
+      </h1>
+
+      <p class="hero-line" data-reveal style="--reveal-delay: 120ms">
+        {profile.positioning}
+      </p>
+
+      <p class="hero-intro" data-reveal style="--reveal-delay: 180ms">
+        {profile.intro}
+      </p>
+
+      <div class="hero-cta" data-reveal style="--reveal-delay: 240ms">
+        <a href="#experience" class="btn btn-primary">
+          <span>See the work</span>
+          <Icon name="arrow" size={18} />
+        </a>
+        <a href="#contact" class="btn btn-ghost">Get in touch</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(5rem, 16vh, 10rem) clamp(4rem, 12vh, 8rem);
+  }
+  /* faint structural grid on its own masked layer — carries the right side,
+     structure you can see, not a glow blob. Content stays crisp above it. */
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: linear-gradient(
+        to right,
+        var(--line) 1px,
+        transparent 1px
+      ),
+      linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+    background-size: clamp(48px, 8vw, 96px) clamp(48px, 8vw, 96px);
+    background-position: center top;
+    -webkit-mask-image: radial-gradient(
+      ellipse 75% 70% at 78% 32%,
+      #000 0%,
+      transparent 70%
+    );
+    mask-image: radial-gradient(
+      ellipse 75% 70% at 78% 32%,
+      #000 0%,
+      transparent 70%
+    );
+  }
+
+  .hero-inner {
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-name {
+    font-size: var(--step-5);
+    letter-spacing: -0.035em;
+    line-height: 0.98;
+    margin-block: var(--space-3) var(--space-4);
+  }
+  .hero-line {
+    font-size: var(--step-2);
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    max-width: 22ch;
+    margin-bottom: var(--space-4);
+  }
+  .hero-intro {
+    font-size: var(--step-1);
+    color: var(--ink-2);
+    max-width: 46ch;
+    line-height: 1.6;
+    margin-bottom: var(--space-6);
+  }
+
+  .hero-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6ch;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    padding: 0.8em 1.3em;
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    transition: transform var(--dur-1) var(--ease-out),
+      background var(--dur-1) var(--ease-out),
+      color var(--dur-1) var(--ease-out),
+      border-color var(--dur-1) var(--ease-out);
+  }
+  .btn svg { transition: transform var(--dur-2) var(--ease-out); }
+  .btn-primary { background: var(--ink); color: var(--bg); }
+  .btn-primary:hover { background: var(--signal); color: var(--on-signal); }
+  .btn-primary:hover svg { transform: translateX(3px); }
+  .btn-ghost { color: var(--ink); border-color: var(--line-strong); }
+  .btn-ghost:hover { border-color: var(--signal); color: var(--signal-text); }
+
+  @media (max-width: 600px) {
+    .hero::before {
+      -webkit-mask-image: radial-gradient(
+        ellipse 90% 55% at 60% 12%,
+        #000 0%,
+        transparent 72%
+      );
+      mask-image: radial-gradient(
+        ellipse 90% 55% at 60% 12%,
+        #000 0%,
+        transparent 72%
+      );
+    }
+  }
+</style>

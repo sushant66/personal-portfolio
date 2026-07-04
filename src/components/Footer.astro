@@ -1,0 +1,33 @@
+---
+import { profile } from '../data/portfolio';
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="shell footer-inner">
+    <span class="footer-name">{profile.name}</span>
+    <span class="footer-meta">© {year}</span>
+    <a href="#top" class="footer-top">Back to top ↑</a>
+  </div>
+</footer>
+
+<style>
+  .footer { border-top: 1px solid var(--line); }
+  .footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-block: var(--space-5);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--ink-3);
+  }
+  .footer-name { color: var(--ink-2); }
+  .footer-top {
+    color: var(--ink-2);
+    transition: color var(--dur-1) var(--ease-out);
+  }
+  .footer-top:hover { color: var(--signal-text); }
+</style>

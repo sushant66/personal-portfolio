@@ -1,0 +1,127 @@
+---
+import Icon from './Icon.astro';
+import { profile, socials } from '../data/portfolio';
+
+const iconFor = (kind: string) =>
+  kind === 'github'
+    ? 'github'
+    : kind === 'linkedin'
+      ? 'linkedin'
+      : kind === 'leetcode'
+        ? 'leetcode'
+        : 'email';
+---
+
+<section class="section contact" id="contact">
+  <div class="shell contact-inner" data-reveal>
+    <div class="contact-lede">
+      <p class="kicker">Open to senior / staff backend roles</p>
+      <h2 class="contact-title">Let's build something that scales.</h2>
+    </div>
+
+    <div class="contact-action">
+      <p class="contact-line">
+        Have a role, a problem, or just want to compare notes on systems and AI
+        tooling? My inbox is open.
+      </p>
+
+      <a href={`mailto:${profile.email}`} class="contact-cta">
+        <Icon name="email" size={20} />
+        <span>{profile.email}</span>
+        <Icon name="arrow" size={18} />
+      </a>
+
+      <ul class="socials">
+        {
+          socials.map((s) => (
+            <li>
+              <a
+                href={s.href}
+                target={s.kind === 'email' ? undefined : '_blank'}
+                rel="noopener noreferrer"
+                aria-label={s.label}
+              >
+                <Icon name={iconFor(s.kind)} size={18} />
+                <span>{s.label}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact { border-top: 2px solid var(--ink); }
+  .contact-inner {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: clamp(2rem, 7vw, 6rem);
+    align-items: center;
+  }
+
+  .contact-title {
+    font-size: var(--step-4);
+    letter-spacing: -0.035em;
+    line-height: 1.02;
+    margin-top: var(--space-3);
+    max-width: 12ch;
+  }
+
+  .contact-line {
+    color: var(--ink-2);
+    font-size: var(--step-1);
+    line-height: 1.55;
+    max-width: 42ch;
+    margin-bottom: var(--space-5);
+  }
+
+  .contact-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8ch;
+    font-family: var(--font-mono);
+    font-size: var(--step-1);
+    color: var(--ink);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-lg);
+    padding: 0.85em 1.15em;
+    transition: background var(--dur-1) var(--ease-out),
+      color var(--dur-1) var(--ease-out),
+      border-color var(--dur-1) var(--ease-out);
+  }
+  .contact-cta:hover {
+    background: var(--signal);
+    color: var(--on-signal);
+    border-color: var(--signal);
+  }
+  .contact-cta svg:last-child { transition: transform var(--dur-2) var(--ease-out); }
+  .contact-cta:hover svg:last-child { transform: translateX(3px); }
+
+  .socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-top: var(--space-6);
+  }
+  .socials a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6ch;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--ink-2);
+    transition: color var(--dur-1) var(--ease-out);
+  }
+  .socials a:hover { color: var(--signal-text); }
+
+  @media (max-width: 800px) {
+    .contact-inner {
+      grid-template-columns: 1fr;
+      gap: var(--space-5);
+      align-items: start;
+    }
+    .contact-title { max-width: 16ch; }
+  }
+</style>

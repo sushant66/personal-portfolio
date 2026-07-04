@@ -1,0 +1,263 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import Icon from '../components/Icon.astro';
+import { profile } from '../data/portfolio';
+
+const PDF = '/Sushant_Kadam.pdf';
+const GITHUB_LATEST =
+  'https://github.com/sushant66/resume/releases/latest/download/Sushant_Kadam.pdf';
+---
+
+<Base title={`Résumé · ${profile.name}`} description={`Résumé of ${profile.name}, ${profile.role}.`}>
+  <Nav />
+
+  <main id="main" class="shell resume">
+    <header class="resume-head" data-reveal>
+      <p class="kicker">Always current</p>
+      <h1>Résumé</h1>
+      <p class="lead">
+        Experience, projects, and technical expertise.
+      </p>
+    </header>
+
+    <section class="card" data-reveal aria-label="Résumé document">
+      <div class="bar">
+        <span class="doc mono">Sushant_Kadam.pdf</span>
+        <div class="tools">
+          <button id="zoomOut" type="button" class="icon-btn" aria-label="Zoom out">
+            <Icon name="zoom-out" size={18} />
+          </button>
+          <span id="zoomLabel" class="zoom mono" aria-live="polite">100%</span>
+          <button id="zoomIn" type="button" class="icon-btn" aria-label="Zoom in">
+            <Icon name="zoom-in" size={18} />
+          </button>
+          <button id="rotate" type="button" class="icon-btn" aria-label="Rotate">
+            <Icon name="rotate" size={18} />
+          </button>
+          <a href={PDF} target="_blank" rel="noopener noreferrer" class="icon-btn" aria-label="Open in new tab">
+            <Icon name="external" size={18} />
+          </a>
+          <a href={PDF} download class="dl">
+            <Icon name="download" size={16} />
+            <span>Download</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="stage" id="pdfStage">
+        <p class="status mono">Loading résumé…</p>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</Base>
+
+<script>
+  import * as pdfjsLib from 'pdfjs-dist';
+  import workerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+
+  pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
+
+  const PDF_URL = '/Sushant_Kadam.pdf';
+  const GITHUB_LATEST =
+    'https://github.com/sushant66/resume/releases/latest/download/Sushant_Kadam.pdf';
+
+  const stage = document.getElementById('pdfStage');
+  const zoomLabel = document.getElementById('zoomLabel');
+  const zoomIn = document.getElementById('zoomIn');
+  const zoomOut = document.getElementById('zoomOut');
+  const rotateBtn = document.getElementById('rotate');
+
+  if (stage) {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let pdf = null;
+    let zoom = 1; // 1 = fit-to-width (shown as 100%)
+    let rotation = 0;
+    let rendering = false;
+
+    const showFallback = () => {
+      stage.classList.add('is-failed');
+      stage.innerHTML = `
+        <div class="fallback">
+          <p class="status mono">Inline preview unavailable.</p>
+          <div class="fallback-actions">
+            <a href="${PDF_URL}" target="_blank" rel="noopener noreferrer" class="dl">Open résumé</a>
+            <a href="${GITHUB_LATEST}" target="_blank" rel="noopener noreferrer" class="dl ghost">Download from GitHub</a>
+          </div>
+        </div>`;
+    };
+
+    async function render() {
+      if (!pdf || rendering) return;
+      rendering = true;
+      const avail = Math.max(240, stage.clientWidth - 48);
+      const frag = document.createDocumentFragment();
+      try {
+        for (let n = 1; n <= pdf.numPages; n++) {
+          const page = await pdf.getPage(n);
+          const unit = page.getViewport({ scale: 1, rotation });
+          const scale = (avail / unit.width) * zoom;
+          const viewport = page.getViewport({ scale, rotation });
+          const canvas = document.createElement('canvas');
+          canvas.className = 'page';
+          canvas.width = Math.floor(viewport.width * dpr);
+          canvas.height = Math.floor(viewport.height * dpr);
+          canvas.style.width = `${Math.floor(viewport.width)}px`;
+          canvas.style.height = `${Math.floor(viewport.height)}px`;
+          const ctx = canvas.getContext('2d');
+          ctx.scale(dpr, dpr);
+          frag.appendChild(canvas);
+          await page.render({ canvasContext: ctx, viewport }).promise;
+        }
+        stage.innerHTML = '';
+        stage.appendChild(frag);
+        zoomLabel.textContent = `${Math.round(zoom * 100)}%`;
+      } catch (err) {
+        console.error('[resume] render failed', err);
+        showFallback();
+      } finally {
+        rendering = false;
+      }
+    }
+
+    zoomIn?.addEventListener('click', () => { zoom = Math.min(zoom + 0.2, 3); render(); });
+    zoomOut?.addEventListener('click', () => { zoom = Math.max(zoom - 0.2, 0.5); render(); });
+    rotateBtn?.addEventListener('click', () => { rotation = (rotation + 90) % 360; render(); });
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(render, 200);
+    });
+
+    (async () => {
+      try {
+        pdf = await pdfjsLib.getDocument(PDF_URL).promise;
+        await render();
+      } catch (err) {
+        console.error('[resume] load failed', err);
+        showFallback();
+      }
+    })();
+  }
+</script>
+
+<style>
+  .resume {
+    padding-block: clamp(3rem, 8vh, 6rem) var(--space-8);
+  }
+
+  .resume-head { margin-bottom: var(--space-6); }
+  .resume-head h1 {
+    font-size: var(--step-5);
+    letter-spacing: -0.035em;
+    margin-block: var(--space-2) var(--space-3);
+  }
+  .lead {
+    font-size: var(--step-1);
+    color: var(--ink-2);
+    max-width: 48ch;
+  }
+
+  /* Contained viewer card */
+  .card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: 0.6rem 0.75rem 0.6rem var(--space-4);
+    border-bottom: 1px solid var(--line);
+    background: var(--bg);
+  }
+  .doc { font-size: var(--step--1); color: var(--ink-3); }
+
+  .tools { display: flex; align-items: center; gap: 0.35rem; }
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: color var(--dur-1) var(--ease-out),
+      background var(--dur-1) var(--ease-out);
+  }
+  .icon-btn:hover { color: var(--ink); background: var(--surface-2); }
+  .zoom {
+    min-width: 3.5ch;
+    text-align: center;
+    font-size: var(--step--1);
+    color: var(--ink-2);
+    user-select: none;
+  }
+  .dl {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5ch;
+    margin-left: 0.35rem;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    padding: 0.5em 0.9em;
+    border-radius: var(--radius);
+    border: 1px solid var(--ink);
+    background: var(--ink);
+    color: var(--bg);
+    transition: background var(--dur-1) var(--ease-out),
+      color var(--dur-1) var(--ease-out),
+      border-color var(--dur-1) var(--ease-out);
+  }
+  .dl:hover { background: var(--signal); border-color: var(--signal); color: var(--on-signal); }
+  .dl.ghost { background: transparent; color: var(--ink); border-color: var(--line-strong); }
+  .dl.ghost:hover { background: transparent; color: var(--signal-text); border-color: var(--signal); }
+
+  .stage {
+    height: min(78vh, 1100px);
+    overflow: auto;
+    padding: var(--space-4);
+    background: var(--surface-2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+    scroll-behavior: smooth;
+    overscroll-behavior: contain;
+  }
+  .stage :global(.page) {
+    box-shadow: 0 6px 24px rgb(0 0 0 / 0.18);
+    border-radius: 2px;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .status { color: var(--ink-3); font-size: var(--step--1); margin: auto; }
+  .fallback {
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+    text-align: center;
+  }
+  .fallback-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); justify-content: center; }
+
+  @media (max-width: 560px) {
+    .bar { flex-wrap: wrap; }
+    .dl span { display: none; }
+    .doc { width: 100%; }
+    .stage { padding: var(--space-2); }
+  }
+</style>

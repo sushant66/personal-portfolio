@@ -1,0 +1,139 @@
+---
+import '@fontsource-variable/archivo';
+import '@fontsource/geist-mono';
+import '../styles/global.css';
+import { profile, socials, experience } from '../data/portfolio';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+}
+
+const {
+  title = `${profile.name} · ${profile.role}`,
+  description = profile.intro,
+  image = '/og.png',
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL(image, Astro.site).href;
+const siteName = `${profile.name} — Portfolio`;
+
+// Structured data: helps search engines identify the person entity and link
+// their profiles (strong signal for ranking a personal name).
+const currentRole = experience[0];
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: profile.name,
+  url: Astro.site?.href,
+  image: ogImage,
+  jobTitle: profile.role,
+  description: profile.intro,
+  email: profile.email,
+  address: { '@type': 'PostalAddress', addressCountry: profile.location },
+  worksFor: currentRole
+    ? { '@type': 'Organization', name: currentRole.company }
+    : undefined,
+  knowsAbout: [
+    'Backend Engineering',
+    'Distributed Systems',
+    'Microservices',
+    'AI Products',
+    'LLM Applications',
+    'Data Pipelines',
+  ],
+  sameAs: socials
+    .filter((s) => s.kind !== 'email')
+    .map((s) => s.href),
+};
+// Favicon: SK monogram, signal-orange ground.
+const favicon =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='14' fill='%23e8551f'/%3E%3Ctext x='50' y='69' font-family='Archivo,Arial,sans-serif' font-size='52' font-weight='800' fill='%23fff' text-anchor='middle'%3ESK%3C/text%3E%3C/svg%3E";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={profile.name} />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href={favicon} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${profile.name}, ${profile.role}`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <script
+      type="application/ld+json"
+      is:inline
+      set:html={JSON.stringify(personSchema)}
+    />
+
+    <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
+
+    {/* Before paint: set theme (no flash) and opt into reveal animations.
+        Adding .js here means content is only ever hidden when JS is live. */}
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        root.classList.add('js');
+        const stored = localStorage.getItem('theme');
+        const dark =
+          stored === 'dark' ||
+          (!stored && matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) root.setAttribute('data-theme', 'dark');
+      })();
+    </script>
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Skip to content</a>
+    <slot />
+
+    {/* Reveal on scroll. Fully self-healing: reveals on intersect, and a
+        failsafe reveals everything still hidden shortly after load so the
+        page can never stay blank in any renderer. */}
+    <script is:inline>
+      (() => {
+        const els = document.querySelectorAll('[data-reveal]');
+        const revealAll = () => els.forEach((el) => el.classList.add('is-in'));
+        const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduce || !('IntersectionObserver' in window)) {
+          revealAll();
+          return;
+        }
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                e.target.classList.add('is-in');
+                io.unobserve(e.target);
+              }
+            });
+          },
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.05 }
+        );
+        els.forEach((el) => io.observe(el));
+        // Failsafe: nothing stays hidden if the observer never fires
+        // (background tab, headless capture, unusual scroll containers).
+        window.addEventListener('load', () => setTimeout(revealAll, 2500));
+      })();
+    </script>
+  </body>
+</html>
