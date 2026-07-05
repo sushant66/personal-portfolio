@@ -1,0 +1,226 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import Icon from '../../components/Icon.astro';
+import { profile } from '../../data/portfolio';
+
+const posts = (await getCollection('blog', ({ data }) => import.meta.env.PROD ? !data.draft : true))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .map((post) => ({
+    id: post.id,
+    ...post.data,
+    readingTime: Math.max(1, Math.round(post.body!.trim().split(/\s+/).length / 200)),
+  }));
+
+const dateFmt = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
+---
+
+<Base
+  title={`Blog · ${profile.name}`}
+  description="Write-ups on backend systems, caching, distributed workflows, and the engineering behind AI products."
+>
+  <Nav />
+
+  <main id="main" class="shell blog">
+    <header class="blog-head" data-reveal>
+      <p class="kicker">Blog</p>
+      <h1>Notes from the build</h1>
+      <p class="lead">
+        Occasional write-ups on backend systems, caching, distributed workflows,
+        and the engineering behind AI products, war stories included.
+      </p>
+    </header>
+
+    {
+      posts.length === 0 ? (
+        <p class="empty mono">No posts published yet. Check back soon.</p>
+      ) : (
+        <ol class="posts">
+          {posts.map((post) => (
+            <li class="post" data-reveal>
+              <a href={`/blog/${post.id}`} class="post-link" aria-label={post.title}>
+                <div class="post-meta">
+                  <time datetime={post.date.toISOString()}>{dateFmt.format(post.date)}</time>
+                  <span class="post-read">{post.readingTime} min read</span>
+                </div>
+
+                <div class="post-body">
+                  <h2 class="post-title">{post.title}</h2>
+                  <p class="post-desc">{post.description}</p>
+                  {post.tags.length > 0 && (
+                    <ul class="tags">
+                      {post.tags.map((t) => (
+                        <li class="tag">{t}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <span class="post-arrow" aria-hidden="true">
+                  <Icon name="arrow" size={18} />
+                </span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      )
+    }
+  </main>
+
+  <Footer />
+</Base>
+
+<style>
+  .blog {
+    padding-block: clamp(3rem, 8vh, 6rem) var(--space-8);
+  }
+
+  .blog-head {
+    margin-bottom: var(--space-7);
+    max-width: 52ch;
+  }
+  .blog-head h1 {
+    font-size: var(--step-4);
+    letter-spacing: -0.035em;
+    margin-block: var(--space-3) var(--space-3);
+  }
+  .lead {
+    font-size: var(--step-1);
+    line-height: 1.55;
+    color: var(--ink-2);
+  }
+
+  .empty {
+    color: var(--ink-3);
+    font-size: var(--step--1);
+    padding-block: var(--space-6);
+    border-top: 1px solid var(--line);
+  }
+
+  .posts {
+    display: flex;
+    flex-direction: column;
+    list-style: none; /* <ol> keeps chronological semantics; no visible marker */
+  }
+
+  .post {
+    border-top: 1px solid var(--line);
+    position: relative;
+  }
+  .post:first-child {
+    border-top: 1px solid var(--line-strong);
+  }
+  /* Orange sweep on the top rule — the shared row-hover motif. */
+  .post::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: -1px;
+    width: 0;
+    height: 2px;
+    background: var(--signal);
+    transition: width var(--dur-3) var(--ease-out);
+  }
+  .post:hover::after,
+  .post:focus-within::after {
+    width: 3.5rem;
+  }
+
+  .post-link {
+    display: grid;
+    grid-template-columns: 10rem minmax(0, 1fr) 2rem;
+    gap: var(--space-2) clamp(1rem, 3vw, 2.5rem);
+    align-items: start;
+    padding-block: var(--space-5);
+  }
+
+  .post-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding-top: 0.35em;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--ink-3);
+  }
+  .post-read {
+    color: var(--ink-3);
+  }
+
+  .post-title {
+    font-size: var(--step-2);
+    letter-spacing: -0.02em;
+    transition: color var(--dur-1) var(--ease-out);
+  }
+  .post-link:hover .post-title,
+  .post-link:focus-visible .post-title {
+    color: var(--signal-text);
+  }
+  .post-desc {
+    color: var(--ink-2);
+    line-height: 1.6;
+    margin-top: var(--space-2);
+    max-width: 62ch;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: var(--space-3);
+  }
+  .tag {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--ink-2);
+    padding: 0.25em 0.65em;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .post-arrow {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 0.5em;
+    color: var(--ink-3);
+    transition: color var(--dur-1) var(--ease-out),
+      transform var(--dur-2) var(--ease-out);
+  }
+  .post-link:hover .post-arrow,
+  .post-link:focus-visible .post-arrow {
+    color: var(--signal-text);
+    transform: translateX(4px);
+  }
+
+  @media (max-width: 720px) {
+    .post-link {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+    .post-meta {
+      flex-direction: row;
+      gap: var(--space-3);
+      padding-top: 0;
+    }
+    .post-arrow {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .post-arrow {
+      transition: color var(--dur-1) var(--ease-out);
+    }
+    .post-link:hover .post-arrow,
+    .post-link:focus-visible .post-arrow {
+      transform: none;
+    }
+  }
+</style>

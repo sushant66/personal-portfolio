@@ -11,5 +11,19 @@ export default defineConfig({
     inlineStylesheets: 'auto',
   },
 
+  // Dual-theme code highlighting. defaultColor:false emits CSS custom props
+  // (--shiki-light / --shiki-dark) instead of hard colors, so the blog's
+  // [data-theme] toggle can switch highlighting without a flash.
+  markdown: {
+    shikiConfig: {
+      themes: {
+        light: 'github-light',
+        dark: 'github-dark',
+      },
+      defaultColor: false,
+      wrap: false,
+    },
+  },
+
   integrations: [sitemap()],
 });

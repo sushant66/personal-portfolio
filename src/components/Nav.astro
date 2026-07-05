@@ -11,6 +11,7 @@ const links = [
   { href: anchor('#projects'), label: 'Projects' },
   { href: anchor('#stack'), label: 'Stack' },
   { href: anchor('#about'), label: 'About' },
+  { href: '/blog', label: 'Blog' },
   { href: '/resume', label: 'Résumé' },
 ];
 const initials = profile.name
@@ -18,7 +19,9 @@ const initials = profile.name
   .map((w) => w[0])
   .join('');
 
-const onResume = Astro.url.pathname.startsWith('/resume');
+// A route link (no anchor) is active when the current path is under it.
+const isRouteActive = (href: string) =>
+  !href.includes('#') && Astro.url.pathname.startsWith(href);
 ---
 
 <header class="nav" id="nav">
@@ -32,7 +35,7 @@ const onResume = Astro.url.pathname.startsWith('/resume');
     <nav class="nav-links" aria-label="Primary">
       {
         links.map((l) => {
-          const active = l.href === '/resume' && onResume;
+          const active = isRouteActive(l.href);
           return (
             <a href={l.href} class={active ? 'active' : undefined} aria-current={active ? 'page' : undefined}>
               {l.label}
@@ -233,7 +236,7 @@ const onResume = Astro.url.pathname.startsWith('/resume');
     });
 
     // Scroll-spy: highlight the nav link for the section currently in view.
-    // Deferred until DOM ready — the sections live below this script in the DOM.
+    // Deferred until DOM ready: the sections live below this script in the DOM.
     const initSpy = () => {
       const spyLinks = document.querySelectorAll('.nav-links a[href*="#"]');
       const sections = new Map();

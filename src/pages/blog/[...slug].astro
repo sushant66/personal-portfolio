@@ -1,0 +1,344 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import Icon from '../../components/Icon.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) =>
+    import.meta.env.PROD ? !data.draft : true
+  );
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const { title, description, date, updated, tags } = post.data;
+
+const readingTime = Math.max(1, Math.round(post.body!.trim().split(/\s+/).length / 200));
+const dateFmt = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
+---
+
+<Base title={`${title} · Blog`} description={description}>
+  <Nav />
+
+  <main id="main" class="shell post">
+    <div class="post-inner">
+      <a href="/blog" class="back mono" data-reveal>
+        <span class="back-arrow" aria-hidden="true"><Icon name="arrow" size={16} /></span>
+        Blog
+      </a>
+
+      <header class="post-header" data-reveal>
+        <h1>{title}</h1>
+      </header>
+
+      <div class="post-layout">
+        <aside class="post-rail" data-reveal>
+          <div class="post-meta mono">
+            <time datetime={date.toISOString()}>{dateFmt.format(date)}</time>
+            <span>{readingTime} min read</span>
+            {updated && <span>Updated {dateFmt.format(updated)}</span>}
+          </div>
+          {tags.length > 0 && (
+            <ul class="tags">
+              {tags.map((t) => (
+                <li class="tag">{t}</li>
+              ))}
+            </ul>
+          )}
+        </aside>
+
+        <div class="post-main">
+          <article class="prose" data-reveal>
+            <Content />
+          </article>
+
+          <footer class="post-foot" data-reveal>
+            <a href="/blog" class="back mono">
+              <span class="back-arrow" aria-hidden="true"><Icon name="arrow" size={16} /></span>
+              All posts
+            </a>
+          </footer>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Base>
+
+<style>
+  .post {
+    padding-block: clamp(2.5rem, 6vh, 4.5rem) var(--space-8);
+  }
+
+  /* Sizes itself to the title + (rail + gap + reading column) block and stays
+     left-aligned with the rest of the site, so the right gutter is modest and
+     the former dead space becomes the meta rail. */
+  .post-inner {
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6ch;
+    font-size: var(--step--1);
+    color: var(--ink-2);
+    transition: color var(--dur-1) var(--ease-out);
+  }
+  .back:hover {
+    color: var(--signal-text);
+  }
+  .back-arrow {
+    display: inline-flex;
+    transform: rotate(180deg);
+    transition: transform var(--dur-2) var(--ease-out);
+  }
+  .back:hover .back-arrow {
+    transform: rotate(180deg) translateX(3px);
+  }
+
+  /* Title spans the full width of the article block, above both columns. */
+  .post-header {
+    width: 100%;
+    margin-block: var(--space-5) var(--space-6);
+    padding-bottom: var(--space-5);
+    border-bottom: 1px solid var(--line);
+  }
+  .post-header h1 {
+    font-size: var(--step-4);
+    letter-spacing: -0.035em;
+    line-height: 1.08;
+  }
+
+  .post-layout {
+    display: grid;
+    grid-template-columns: 12rem minmax(0, var(--measure));
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    align-items: start;
+  }
+
+  .post-rail {
+    position: sticky;
+    top: 5rem; /* clears the sticky nav */
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .post-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: var(--step--1);
+    color: var(--ink-3);
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .tag {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--ink-2);
+    padding: 0.25em 0.65em;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .post-main {
+    min-width: 0;
+  }
+
+  .post-foot {
+    margin-top: var(--space-7);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--line);
+  }
+
+  /* Single column: rail folds into an inline meta row above the body. */
+  @media (max-width: 900px) {
+    .post-inner {
+      width: 100%;
+    }
+    .post-layout {
+      grid-template-columns: 1fr;
+      gap: var(--space-5);
+    }
+    .post-rail {
+      position: static;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-2) var(--space-4);
+    }
+    .post-meta {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.6rem 1.2ch;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .back-arrow,
+    .back:hover .back-arrow {
+      transition: none;
+      transform: rotate(180deg);
+    }
+  }
+</style>
+
+{/* Long-form prose. Global (Content injects raw HTML) but scoped under .prose,
+    which exists only on this route. */}
+<style is:global>
+  .prose {
+    max-width: var(--measure);
+    color: var(--ink);
+    font-size: var(--step-0);
+    line-height: 1.72;
+  }
+
+  /* The markdown's leading H1 duplicates the page header — hide it. */
+  .prose > h1:first-child {
+    display: none;
+  }
+
+  .prose p {
+    margin-block: var(--space-4);
+    color: var(--ink);
+  }
+
+  .prose h2 {
+    font-size: var(--step-2);
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    margin-block: var(--space-7) var(--space-3);
+    scroll-margin-top: 5rem;
+  }
+  .prose h3 {
+    font-size: var(--step-1);
+    letter-spacing: -0.02em;
+    margin-block: var(--space-6) var(--space-2);
+    scroll-margin-top: 5rem;
+  }
+
+  .prose a {
+    color: var(--signal-text);
+    text-decoration: underline;
+    text-decoration-color: var(--signal-tint-2);
+    text-underline-offset: 3px;
+    transition: text-decoration-color var(--dur-1) var(--ease-out);
+  }
+  .prose a:hover {
+    text-decoration-color: var(--signal);
+  }
+
+  .prose strong {
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .prose em {
+    font-style: italic;
+  }
+
+  .prose ul,
+  .prose ol {
+    margin-block: var(--space-4);
+    padding-inline-start: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .prose ul {
+    list-style: disc;
+  }
+  .prose ol {
+    list-style: decimal;
+  }
+  .prose li {
+    padding-inline-start: 0.35rem;
+  }
+  .prose li::marker {
+    color: var(--ink-3);
+  }
+
+  /* Inline code — a code chip, distinct from block code. */
+  .prose :not(pre) > code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    color: var(--ink);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 0.12em 0.4em;
+    word-break: break-word;
+  }
+
+  /* Block code — Shiki renders <pre class="astro-code">. We keep the theme's
+     token colors but seat the block on our own surface for a native feel. */
+  .prose pre.astro-code {
+    margin-block: var(--space-5);
+    padding: var(--space-4);
+    background: var(--surface) !important;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow-x: auto;
+    font-size: var(--step--1);
+    line-height: 1.6;
+    -webkit-overflow-scrolling: touch;
+  }
+  .prose pre.astro-code code {
+    font-family: var(--font-mono);
+    display: block;
+    width: fit-content;
+    min-width: 100%;
+  }
+  /* Dual-theme tokens: defaultColor:false emits --shiki-light / --shiki-dark. */
+  .prose .astro-code,
+  .prose .astro-code span {
+    color: var(--shiki-light);
+  }
+  :root[data-theme='dark'] .prose .astro-code,
+  :root[data-theme='dark'] .prose .astro-code span {
+    color: var(--shiki-dark);
+  }
+
+  .prose hr {
+    border: 0;
+    border-top: 1px solid var(--line);
+    margin-block: var(--space-6);
+  }
+
+  .prose blockquote {
+    margin-block: var(--space-5);
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: var(--ink-2);
+    font-style: italic;
+  }
+  .prose blockquote p {
+    margin: 0;
+    color: inherit;
+  }
+
+  /* The closing italic reference note reads as a quiet footnote. */
+  .prose > p:last-child > em:only-child {
+    color: var(--ink-2);
+    font-size: var(--step--1);
+  }
+</style>
