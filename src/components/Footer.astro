@@ -1,13 +1,40 @@
 ---
 import { profile } from '../data/portfolio';
 const year = new Date().getFullYear();
+
+// Anchor links resolve to the home page from any route (same rule as Nav).
+const base = Astro.url.pathname === '/' ? '' : '/';
+const links = [
+  { href: `${base}#experience`, label: 'Experience' },
+  { href: `${base}#projects`, label: 'Projects' },
+  { href: '/blog', label: 'Blog' },
+  { href: '/resume', label: 'Résumé' },
+];
+const isRouteActive = (href: string) =>
+  !href.includes('#') && Astro.url.pathname.startsWith(href);
 ---
 
 <footer class="footer">
   <div class="shell footer-inner">
     <span class="footer-name">{profile.name}</span>
-    <span class="footer-meta">© {year}</span>
-    <a href="#top" class="footer-top">Back to top ↑</a>
+
+    <nav class="footer-links" aria-label="Footer">
+      {
+        links.map((l) => {
+          const active = isRouteActive(l.href);
+          return (
+            <a href={l.href} aria-current={active ? 'page' : undefined}>
+              {l.label}
+            </a>
+          );
+        })
+      }
+    </nav>
+
+    <div class="footer-end">
+      <span class="footer-meta">© {year}</span>
+      <a href="#top" class="footer-top">Back to top ↑</a>
+    </div>
   </div>
 </footer>
 
@@ -18,16 +45,48 @@ const year = new Date().getFullYear();
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-3);
+    gap: var(--space-3) var(--space-5);
     padding-block: var(--space-5);
     font-family: var(--font-mono);
     font-size: var(--step--1);
     color: var(--ink-3);
   }
   .footer-name { color: var(--ink-2); }
+
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+  }
+  .footer-links a {
+    color: var(--ink-2);
+    transition: color var(--dur-1) var(--ease-out);
+  }
+  .footer-links a:hover { color: var(--signal-text); }
+  .footer-links a[aria-current='page'] { color: var(--ink); }
+
+  .footer-end {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
   .footer-top {
     color: var(--ink-2);
     transition: color var(--dur-1) var(--ease-out);
   }
   .footer-top:hover { color: var(--signal-text); }
+
+  /* Stack into left-aligned rows rather than letting space-between strand
+     the middle group on its own line. */
+  @media (max-width: 700px) {
+    .footer-inner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-3);
+    }
+    .footer-end {
+      justify-content: space-between;
+      width: 100%;
+    }
+  }
 </style>
